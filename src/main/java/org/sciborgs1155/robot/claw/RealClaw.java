@@ -6,7 +6,7 @@ public class RealClaw implements ClawIO {
   private final PWMSparkFlex motor = new PWMSparkFlex(0);
 
   @Override
-  public void set(double voltage) {
-    motor.setVoltage(voltage);
+  public void set(double speed) {
+    motor.set(speed);
   }
 }

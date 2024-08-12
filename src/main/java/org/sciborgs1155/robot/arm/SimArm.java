@@ -2,7 +2,7 @@ package org.sciborgs1155.robot.arm;
 
 import static edu.wpi.first.units.Units.*;
 import static org.sciborgs1155.robot.Constants.*;
-import static org.sciborgs1155.robot.arm.PivotConstants.*;
+import static org.sciborgs1155.robot.arm.ArmConstants.*;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
