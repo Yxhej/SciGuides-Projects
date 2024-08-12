@@ -5,11 +5,16 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import monologue.Logged;
+import org.sciborgs1155.robot.Robot;
 
 public class Arm extends SubsystemBase implements Logged {
   private final ArmIO hardware;
   private final ProfiledPIDController pid;
   private final ArmFeedforward ff;
+
+  public static Arm create() {
+    return Robot.isReal() ? new Arm(new RealArm()) : new Arm(new SimArm());
+  }
 
   public Arm(ArmIO hardware) {
     this.hardware = hardware;

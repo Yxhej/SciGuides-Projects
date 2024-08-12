@@ -19,6 +19,8 @@ import org.sciborgs1155.lib.CommandRobot;
 import org.sciborgs1155.lib.FaultLogger;
 import org.sciborgs1155.lib.InputStream;
 import org.sciborgs1155.robot.Ports.OI;
+import org.sciborgs1155.robot.arm.Arm;
+import org.sciborgs1155.robot.claw.Claw;
 import org.sciborgs1155.robot.commands.Autos;
 import org.sciborgs1155.robot.drive.Drive;
 import org.sciborgs1155.robot.drive.DriveConstants;
@@ -37,6 +39,8 @@ public class Robot extends CommandRobot implements Logged {
 
   // SUBSYSTEMS
   private final Drive drive = Drive.create();
+  private final Arm arm = Arm.create();
+  private final Claw claw = Claw.create();
 
   // COMMANDS
   @Log.NT private final Autos autos = new Autos();

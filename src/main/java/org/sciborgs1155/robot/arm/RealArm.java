@@ -8,7 +8,7 @@ public class RealArm implements ArmIO {
   private final DutyCycleEncoder encoder = new DutyCycleEncoder(1);
 
   public RealArm() {
-    // configurations go here...
+    encoder.setDistancePerRotation(0);
   }
 
   @Override
