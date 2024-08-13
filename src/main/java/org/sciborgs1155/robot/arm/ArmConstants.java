@@ -41,14 +41,15 @@ public class ArmConstants {
   public static final Measure<Velocity<Velocity<Angle>>> MAX_ACCEL =
       RadiansPerSecond.per(Second).of(13.0);
 
-  public static final Measure<Angle> STARTING_ANGLE = Degrees.of(63.3);
+  public static final Measure<Angle> STARTING_ANGLE = Degrees.of(0);
 
-  public static final Measure<Angle> MIN_ANGLE = Degrees.of(-45.7);
-  public static final Measure<Angle> MAX_ANGLE = STARTING_ANGLE.minus(Degrees.of(1.2));
+  public static final Measure<Angle> MIN_ANGLE = Degrees.of(-45);
+  public static final Measure<Angle> MAX_ANGLE = Degrees.of(225);
 
-  public static final double kP = 8.0;
+  // desperately needs tuning (we love steady-state error)
+  public static final double kP = 20;
   public static final double kI = 0.0;
-  public static final double kD = 0.5;
+  public static final double kD = 0.02;
 
   public static final double kS = 0.14296;
   public static final double kV = 1.7305;

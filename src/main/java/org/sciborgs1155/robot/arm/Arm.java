@@ -2,6 +2,8 @@ package org.sciborgs1155.robot.arm;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static org.sciborgs1155.robot.arm.ArmConstants.*;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -18,13 +20,17 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 import monologue.Annotations.Log;
 import monologue.Logged;
+import org.sciborgs1155.lib.InputStream;
+import org.sciborgs1155.robot.Constants;
 import org.sciborgs1155.robot.Robot;
 
 public class Arm extends SubsystemBase implements Logged {
   private final ArmIO hardware;
 
+  @Log.NT private double voltageOut = 0;
   @Log.NT private final ProfiledPIDController pid;
   private final ArmFeedforward ff;
 
@@ -49,26 +55,37 @@ public class Arm extends SubsystemBase implements Logged {
 
     pid.setTolerance(POSITION_TOLERANCE.in(Radians));
 
-    setDefaultCommand(moveTo(0).withName("default"));
+    setDefaultCommand(moveTo(Radians.of(Math.PI / 2 + 0.495828)).withName("default"));
   }
 
   public Command moveTo(Measure<Angle> goal) {
-    return moveTo(goal.in(Radians));
+    return moveTo(() -> goal.in(Radians));
   }
 
-  public Command moveTo(double goal) {
-    return run(() -> updateGoal(goal)).until(pid::atGoal).finallyDo(() -> hardware.setVoltage(0));
+  public Command moveTo(DoubleSupplier goal) {
+    return run(() -> updateGoal(goal.getAsDouble()))
+        .until(pid::atGoal)
+        .finallyDo(() -> hardware.setVoltage(0));
+  }
+
+  public Command manualControl(DoubleSupplier stickInput) {
+    return moveTo(
+        InputStream.of(stickInput)
+            .scale(MAX_VELOCITY.in(RadiansPerSecond) / 4)
+            .scale(Constants.PERIOD.in(Seconds))
+            .add(() -> pid.getGoal().position));
   }
 
   public void updateGoal(double goal) {
     pid.setGoal(goal);
     double pidOutput = pid.calculate(hardware.position(), goal);
     double ffOutput = ff.calculate(pid.getSetpoint().position, pid.getSetpoint().velocity);
+    voltageOut = pidOutput + ffOutput;
     hardware.setVoltage(pidOutput + ffOutput);
   }
 
   public void setState(double angle) {
-    arm.setAngle(Units.radiansToDegrees(angle + Math.PI));
+    arm.setAngle(Units.radiansToDegrees(angle));
   }
 
   @Override
@@ -76,6 +93,6 @@ public class Arm extends SubsystemBase implements Logged {
     setState(hardware.position());
     log("command", Optional.ofNullable(getCurrentCommand()).map(Command::getName).orElse("none"));
     log("at goal", pid.atGoal());
-    log("position", hardware.position());
+    log("position", (hardware.position()));
   }
 }
