@@ -9,6 +9,8 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/Robot/arm/mech": "Mechanism2d",
+      "/Robot/arm/pid": "ProfiledPIDController",
       "/Robot/autos": "String Chooser",
       "/Robot/drive/field2d": "Field2d",
       "/Robot/drive/frontLeft/driveFeedback": "PIDController",
@@ -29,6 +31,11 @@
       "/SmartDashboard/turn quasistatic forward": "Command"
     },
     "windows": {
+      "/Robot/arm/mech": {
+        "window": {
+          "visible": true
+        }
+      },
       "/Robot/drive/field2d": {
         "module- FL": {
           "style": "Line"
@@ -45,22 +52,18 @@
         "window": {
           "visible": true
         }
-      },
-      "/SmartDashboard/drive dynamic forward": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/drive quasistatic forward": {
-        "window": {
-          "visible": true
-        }
       }
     }
   },
   "NetworkTables": {
     "transitory": {
       "Robot": {
+        "arm": {
+          "open": true,
+          "pid": {
+            "open": true
+          }
+        },
         "drive": {
           "Pose2d##v_/Robot/drive/getPose": {
             "Rotation2d##v_rotation": {
@@ -82,8 +85,7 @@
               "open": true
             },
             "open": true
-          },
-          "open": true
+          }
         },
         "open": true
       },
