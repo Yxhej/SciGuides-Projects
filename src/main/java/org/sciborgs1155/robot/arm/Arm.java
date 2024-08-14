@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import static org.sciborgs1155.robot.arm.ArmConstants.*;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -31,7 +32,9 @@ public class Arm extends SubsystemBase implements Logged {
   private final ArmIO hardware;
 
   @Log.NT private double voltageOut = 0;
-  @Log.NT private final ProfiledPIDController pid;
+  private final ProfiledPIDController pid;
+  @Log.NT private final PIDController pidBad;
+
   private final ArmFeedforward ff;
 
   @Log.NT private final Mechanism2d mech = new Mechanism2d(2, 2);
@@ -51,11 +54,16 @@ public class Arm extends SubsystemBase implements Logged {
     pid =
         new ProfiledPIDController(
             kP, kI, kD, new TrapezoidProfile.Constraints(MAX_VELOCITY, MAX_ACCEL));
+
+    pidBad = new PIDController(kP, kI, kD);
+
     ff = new ArmFeedforward(kS, kV, kA);
 
-    pid.setTolerance(POSITION_TOLERANCE.in(Radians));
+    pidBad.setTolerance(POSITION_TOLERANCE.in(Radians));
+    // pid.setTolerance(POSITION_TOLERANCE.in(Radians));
 
-    setDefaultCommand(moveTo(Radians.of(Math.PI / 2 + 0.495828)).withName("default"));
+    // pid.setGoal(STARTING_ANGLE.in(Radians));
+    setDefaultCommand(moveTo(() -> STARTING_ANGLE.in(Radians)).withName("default"));
   }
 
   public Command moveTo(Measure<Angle> goal) {
@@ -64,6 +72,7 @@ public class Arm extends SubsystemBase implements Logged {
 
   public Command moveTo(DoubleSupplier goal) {
     return run(() -> updateGoal(goal.getAsDouble()))
+        .withTimeout(4)
         .until(pid::atGoal)
         .finallyDo(() -> hardware.setVoltage(0));
   }
@@ -84,6 +93,32 @@ public class Arm extends SubsystemBase implements Logged {
     hardware.setVoltage(pidOutput + ffOutput);
   }
 
+  //   public Command moveTo(Measure<Angle> setpoint) {
+  //   return moveTo(() -> setpoint.in(Radians));
+  // }
+
+  // public Command moveTo(DoubleSupplier setpoint) {
+  //   return run(() -> updateGoal(setpoint.getAsDouble())).withTimeout(4)
+  //       .until(pidBad::atSetpoint)
+  //       .finallyDo(() -> hardware.setVoltage(0));
+  // }
+
+  // public Command manualControl(DoubleSupplier stickInput) {
+  //   return moveTo(
+  //       InputStream.of(stickInput)
+  //           .scale(MAX_VELOCITY.in(RadiansPerSecond) / 4)
+  //           .scale(Constants.PERIOD.in(Seconds))
+  //           .add(() -> pidBad.getSetpoint()));
+  // }
+
+  // public void updateGoal(double setpoint) {
+  //   pidBad.setSetpoint(setpoint);
+  //   double pidOutput = pidBad.calculate(hardware.position(), setpoint);
+  //   double ffOutput = ff.calculate(pidBad.getSetpoint(), 0);
+  //   voltageOut = pidOutput + ffOutput;
+  //   hardware.setVoltage(pidOutput + ffOutput);
+  // }
+
   public void setState(double angle) {
     arm.setAngle(Units.radiansToDegrees(angle));
   }
@@ -93,6 +128,7 @@ public class Arm extends SubsystemBase implements Logged {
     setState(hardware.position());
     log("command", Optional.ofNullable(getCurrentCommand()).map(Command::getName).orElse("none"));
     log("at goal", pid.atGoal());
+    log("at setpoint", pidBad.atSetpoint());
     log("position", (hardware.position()));
   }
 }

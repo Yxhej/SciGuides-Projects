@@ -11,6 +11,7 @@
       "/FMSInfo": "FMSInfo",
       "/Robot/arm/mech": "Mechanism2d",
       "/Robot/arm/pid": "ProfiledPIDController",
+      "/Robot/arm/pidBad": "PIDController",
       "/Robot/autos": "String Chooser",
       "/Robot/drive/field2d": "Field2d",
       "/Robot/drive/frontLeft/driveFeedback": "PIDController",
@@ -61,6 +62,9 @@
         "arm": {
           "open": true,
           "pid": {
+            "open": true
+          },
+          "pidBad": {
             "open": true
           }
         },

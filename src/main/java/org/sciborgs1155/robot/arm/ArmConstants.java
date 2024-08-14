@@ -37,11 +37,11 @@ public class ArmConstants {
   public static final Measure<Mass> MASS = Kilograms.of(1);
   public static final Measure<Distance> LENGTH = Inches.of(16);
 
-  public static final Measure<Velocity<Angle>> MAX_VELOCITY = RadiansPerSecond.of(9.0);
+  public static final Measure<Velocity<Angle>> MAX_VELOCITY = RadiansPerSecond.of(4);
   public static final Measure<Velocity<Velocity<Angle>>> MAX_ACCEL =
-      RadiansPerSecond.per(Second).of(13.0);
+      RadiansPerSecond.per(Second).of(6);
 
-  public static final Measure<Angle> STARTING_ANGLE = Degrees.of(0);
+  public static final Measure<Angle> STARTING_ANGLE = Degrees.of(20);
 
   public static final Measure<Angle> MIN_ANGLE = Degrees.of(-45);
   public static final Measure<Angle> MAX_ANGLE = Degrees.of(225);
