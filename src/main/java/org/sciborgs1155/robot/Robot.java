@@ -5,10 +5,13 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.wpilibj2.command.button.RobotModeTriggers.*;
+import static org.sciborgs1155.robot.Constants.PERIOD;
 
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -19,6 +22,7 @@ import org.littletonrobotics.urcl.URCL;
 import org.sciborgs1155.lib.CommandRobot;
 import org.sciborgs1155.lib.FaultLogger;
 import org.sciborgs1155.lib.InputStream;
+import org.sciborgs1155.lib.Test;
 import org.sciborgs1155.robot.Ports.OI;
 import org.sciborgs1155.robot.arm.Arm;
 import org.sciborgs1155.robot.claw.Claw;
@@ -46,7 +50,7 @@ public class Robot extends CommandRobot implements Logged {
   // COMMANDS
   @Log.NT private final Autos autos = new Autos();
 
-  @Log.NT private double speedMultiplier = Constants.FULL_SPEED;
+  @Log.NT private double speedMultiplier = Constants.FULL_SPEED_MULTIPLIER;
 
   /** The robot contains subsystems, OI devices, and commands. */
   public Robot() {
@@ -60,9 +64,8 @@ public class Robot extends CommandRobot implements Logged {
     // Configure logging with DataLogManager, Monologue, FailureManagement, and URCL
     DataLogManager.start();
     Monologue.setupMonologue(this, "/Robot", false, true);
-    addPeriodic(Monologue::updateAll, kDefaultPeriod);
-    FaultLogger.setupLogging();
-    addPeriodic(FaultLogger::update, 1);
+    addPeriodic(Monologue::updateAll, PERIOD.in(Seconds));
+    addPeriodic(FaultLogger::update, 2);
 
     if (isReal()) {
       URCL.start();
@@ -106,13 +109,12 @@ public class Robot extends CommandRobot implements Logged {
   /** Configures trigger -> command bindings */
   private void configureBindings() {
     autonomous().whileTrue(new ProxyCommand(autos::get));
-    FaultLogger.onFailing(f -> Commands.print(f.toString()));
 
     driver
         .leftBumper()
         .or(driver.rightBumper())
-        .onTrue(Commands.runOnce(() -> speedMultiplier = Constants.FULL_SPEED))
-        .onFalse(Commands.run(() -> speedMultiplier = Constants.SLOW_SPEED));
+        .onTrue(Commands.runOnce(() -> speedMultiplier = Constants.FULL_SPEED_MULTIPLIER))
+        .onFalse(Commands.run(() -> speedMultiplier = Constants.SLOW_SPEED_MULTIPLIER));
 
     operator.x().onTrue(arm.moveTo(Degrees.of(192)));
 
@@ -121,5 +123,9 @@ public class Robot extends CommandRobot implements Logged {
         .toggleOnTrue(
             arm.manualControl(
                 InputStream.of(operator::getLeftY).negate().deadband(Constants.DEADBAND, 1)));
+  }
+
+  public Command systemsCheck() {
+    return Test.toCommand(drive.systemsCheck()).withName("Test Mechanisms");
   }
 }

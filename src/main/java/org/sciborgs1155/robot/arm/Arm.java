@@ -25,6 +25,7 @@ import java.util.function.DoubleSupplier;
 import monologue.Annotations.Log;
 import monologue.Logged;
 import org.sciborgs1155.lib.InputStream;
+import org.sciborgs1155.lib.Test;
 import org.sciborgs1155.robot.Constants;
 import org.sciborgs1155.robot.Robot;
 
@@ -121,6 +122,10 @@ public class Arm extends SubsystemBase implements Logged {
 
   public void setState(double angle) {
     arm.setAngle(Units.radiansToDegrees(angle));
+  }
+
+  public Test systemsCheck() {
+    return Test.fromCommand(moveTo(() -> 100));
   }
 
   @Override
