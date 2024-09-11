@@ -1,9 +1,11 @@
 package org.sciborgs1155.robot.arm;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
+import static org.sciborgs1155.lib.Assertion.tAssert;
 import static org.sciborgs1155.robot.arm.ArmConstants.*;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -21,9 +23,12 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.DoubleSupplier;
+import java.util.function.Function;
 import monologue.Annotations.Log;
 import monologue.Logged;
+import org.sciborgs1155.lib.Assertion.TruthAssertion;
 import org.sciborgs1155.lib.InputStream;
 import org.sciborgs1155.lib.Test;
 import org.sciborgs1155.robot.Constants;
@@ -125,8 +130,41 @@ public class Arm extends SubsystemBase implements Logged {
   }
 
   public Test systemsCheck() {
-    return Test.fromCommand(moveTo(() -> 100));
+    Command testCommand = moveTo(Degrees.of(45));
+    Function<ArmIO, TruthAssertion> positionCheck =
+        a ->
+            tAssert(
+                () -> a.position() == Degrees.of(45).in(Radians),
+                "ArmPos Check",
+                "expected pi/4 rad, actually " + a.position() + " rad");
+    TruthAssertion assertions = positionCheck.apply(hardware);
+    return new Test(testCommand, Set.of(assertions));
   }
+
+  // public Test systemsCheck() {
+  //   ChassisSpeeds speeds = new ChassisSpeeds(1, 1, 0);
+  //   Command testCommand =
+  //       run(() -> setChassisSpeeds(speeds, ControlMode.OPEN_LOOP_VELOCITY)).withTimeout(0.5);
+  //   Function<ModuleIO, TruthAssertion> speedCheck =
+  //       m ->
+  //           tAssert(
+  //               () -> m.state().speedMetersPerSecond * Math.signum(m.position().angle.getCos()) >
+  // 1,
+  //               "Drive Syst Check " + m.name() + " Module Speed",
+  //               "expected: >= 1; actual: " + m.state().speedMetersPerSecond);
+  //   Function<ModuleIO, EqualityAssertion> atAngle =
+  //       m ->
+  //           eAssert(
+  //               "Drive Syst Check " + m.name() + " Module Angle (degrees)",
+  //               () -> 45,
+  //               () -> Units.radiansToDegrees(atan(m.position().angle.getTan())),
+  //               1);
+  //   Set<Assertion> assertions =
+  //       modules.stream()
+  //           .flatMap(m -> Stream.of(speedCheck.apply(m), atAngle.apply(m)))
+  //           .collect(Collectors.toSet());
+  //   return new Test(testCommand, assertions);
+  // }
 
   @Override
   public void periodic() {
