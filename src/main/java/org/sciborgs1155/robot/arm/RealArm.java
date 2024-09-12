@@ -25,4 +25,10 @@ public class RealArm implements ArmIO {
   public double position() {
     return encoder.get();
   }
+
+  @Override
+  public void close() {
+    motor.close();
+    encoder.close();
+  }
 }

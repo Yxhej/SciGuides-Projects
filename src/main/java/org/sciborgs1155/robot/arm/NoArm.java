@@ -8,4 +8,7 @@ public class NoArm implements ArmIO {
   public double position() {
     return 0;
   }
+
+  @Override
+  public void close() {}
 }

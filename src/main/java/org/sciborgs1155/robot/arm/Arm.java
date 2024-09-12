@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
-import static org.sciborgs1155.lib.Assertion.tAssert;
 import static org.sciborgs1155.robot.arm.ArmConstants.*;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
@@ -25,16 +24,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
-import java.util.function.Function;
 import monologue.Annotations.Log;
 import monologue.Logged;
+import org.sciborgs1155.lib.Assertion;
+import org.sciborgs1155.lib.Assertion.EqualityAssertion;
 import org.sciborgs1155.lib.Assertion.TruthAssertion;
 import org.sciborgs1155.lib.InputStream;
 import org.sciborgs1155.lib.Test;
 import org.sciborgs1155.robot.Constants;
 import org.sciborgs1155.robot.Robot;
 
-public class Arm extends SubsystemBase implements Logged {
+public class Arm extends SubsystemBase implements Logged, AutoCloseable {
   private final ArmIO hardware;
 
   @Log.NT private double voltageOut = 0;
@@ -129,16 +129,24 @@ public class Arm extends SubsystemBase implements Logged {
     arm.setAngle(Units.radiansToDegrees(angle));
   }
 
-  public Test systemsCheck() {
-    Command testCommand = moveTo(Degrees.of(45));
-    Function<ArmIO, TruthAssertion> positionCheck =
-        a ->
-            tAssert(
-                () -> a.position() == Degrees.of(45).in(Radians),
-                "ArmPos Check",
-                "expected pi/4 rad, actually " + a.position() + " rad");
-    TruthAssertion assertions = positionCheck.apply(hardware);
-    return new Test(testCommand, Set.of(assertions));
+  public Test moveToTest(Measure<Angle> angle) {
+    Command testCommand = moveTo(angle);
+    EqualityAssertion positionCheck =
+        Assertion.eAssert(
+            "Arm Position Check: expected "
+                + angle.in(Radians)
+                + " rad, actually "
+                + hardware.position()
+                + " rad",
+            () -> Degrees.of(45).in(Radians),
+            hardware::position,
+            0.5);
+    TruthAssertion atGoalCheck =
+        Assertion.tAssert(
+            pid::atGoal,
+            "Arm At Goal Check",
+            "expected " + angle.in(Radians) + " rad, actually " + hardware.position() + " rad");
+    return new Test(testCommand, Set.of(positionCheck, atGoalCheck));
   }
 
   // public Test systemsCheck() {
@@ -173,5 +181,10 @@ public class Arm extends SubsystemBase implements Logged {
     log("at goal", pid.atGoal());
     log("at setpoint", pidBad.atSetpoint());
     log("position", (hardware.position()));
+  }
+
+  @Override
+  public void close() throws Exception {
+    hardware.close();
   }
 }

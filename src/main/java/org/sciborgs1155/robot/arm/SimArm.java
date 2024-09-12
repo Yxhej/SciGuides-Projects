@@ -33,4 +33,7 @@ public class SimArm implements ArmIO {
   public double position() {
     return sim.getAngleRads();
   }
+
+  @Override
+  public void close() {}
 }
