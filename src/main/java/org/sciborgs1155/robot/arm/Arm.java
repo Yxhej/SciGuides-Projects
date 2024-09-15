@@ -1,6 +1,5 @@
 package org.sciborgs1155.robot.arm;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
@@ -131,22 +130,18 @@ public class Arm extends SubsystemBase implements Logged, AutoCloseable {
 
   public Test moveToTest(Measure<Angle> angle) {
     Command testCommand = moveTo(angle);
-    EqualityAssertion positionCheck =
+    EqualityAssertion velocityCheck =
         Assertion.eAssert(
-            "Arm Position Check: expected "
-                + angle.in(Radians)
-                + " rad, actually "
-                + hardware.position()
-                + " rad",
-            () -> Degrees.of(45).in(Radians),
+            "Arm Position Check: expected 0 rad/s, actually " + hardware.velocity() + " rad/s",
+            () -> 0,
             hardware::position,
             0.5);
-    TruthAssertion atGoalCheck =
+    TruthAssertion atPositionCheck =
         Assertion.tAssert(
             pid::atGoal,
             "Arm At Goal Check",
             "expected " + angle.in(Radians) + " rad, actually " + hardware.position() + " rad");
-    return new Test(testCommand, Set.of(positionCheck, atGoalCheck));
+    return new Test(testCommand, Set.of(velocityCheck, atPositionCheck));
   }
 
   // public Test systemsCheck() {

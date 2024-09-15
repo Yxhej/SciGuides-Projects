@@ -36,4 +36,9 @@ public class SimArm implements ArmIO {
 
   @Override
   public void close() {}
+
+  @Override
+  public double velocity() {
+    return sim.getVelocityRadPerSec();
+  }
 }

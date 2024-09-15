@@ -31,4 +31,9 @@ public class RealArm implements ArmIO {
     motor.close();
     encoder.close();
   }
+
+  @Override
+  public double velocity() {
+    return 0;
+  }
 }

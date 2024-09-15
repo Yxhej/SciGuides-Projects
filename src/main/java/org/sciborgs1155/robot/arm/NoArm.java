@@ -11,4 +11,9 @@ public class NoArm implements ArmIO {
 
   @Override
   public void close() {}
+
+  @Override
+  public double velocity() {
+    return 0;
+  }
 }

@@ -5,6 +5,8 @@ public interface ArmIO extends AutoCloseable {
 
   double position();
 
+  double velocity();
+
   @Override
   void close();
 }
