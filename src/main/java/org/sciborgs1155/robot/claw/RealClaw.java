@@ -1,9 +1,10 @@
 package org.sciborgs1155.robot.claw;
 
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkFlex;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkMax;
 
 public class RealClaw implements ClawIO {
-  private final PWMSparkFlex motor = new PWMSparkFlex(0);
+  private final CANSparkMax motor = new CANSparkMax(0, MotorType.kBrushless);
 
   @Override
   public void set(double speed) {

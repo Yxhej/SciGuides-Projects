@@ -123,9 +123,12 @@ public class Robot extends CommandRobot implements Logged {
         .toggleOnTrue(
             arm.manualControl(
                 InputStream.of(operator::getLeftY).negate().deadband(Constants.DEADBAND, 1)));
+
+    test().onTrue(systemsCheck());
   }
 
   public Command systemsCheck() {
-    return Test.toCommand(drive.systemsCheck()).withName("Test Mechanisms");
+    return Test.toCommand(drive.systemsCheck(), arm.moveToTest(Degrees.of(100)))
+        .withName("Test Mechanisms");
   }
 }
